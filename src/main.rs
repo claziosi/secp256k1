@@ -46,10 +46,14 @@ async fn validate_signature(signed_message: web::Json<SignedMessage>) -> impl Re
     // Verify the signature
     verifier.update(&msg).unwrap();
 
-    match verifier.verify(&signature_bytes) {
-        Ok(_) => HttpResponse::Ok().body("true"),
-        Err(_) => HttpResponse::BadRequest().body("Invalid signature"),
-    } 
+    let result = verifier.verify(&signature_bytes).unwrap();
+
+    if result {
+        HttpResponse::Ok().body("true")
+    } else {
+        HttpResponse::BadRequest().body("Signature is invalid")
+    }
+
 }
 
 
