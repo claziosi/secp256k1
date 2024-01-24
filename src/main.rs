@@ -17,7 +17,9 @@ pub struct SignedMessage {
 
 // Handler for validating signatures
 async fn validate_signature(signed_message: web::Json<SignedMessage>) -> impl Responder {
-    
+    // Nonce to prevent replay attacks (find a way to send it to the client)
+    let nonce = "30450221009137c8489f844822843868d77f93c288ea64427005".as_bytes().to_vec();
+
     // Convert hexadecimal strings to byte slices
     let public_key_bytes = hex::decode(&signed_message.public_key).unwrap();
     let signature_bytes = hex::decode(&signed_message.signature).unwrap();
@@ -44,7 +46,10 @@ async fn validate_signature(signed_message: web::Json<SignedMessage>) -> impl Re
     /* let msg = hex::decode(&signed_message.message).unwrap();
     verifier.update(&msg).unwrap(); */
     //let msg = "Hello World!".bytes().collect::<Vec<u8>>();
-    let msg = signed_message.message.bytes().collect::<Vec<u8>>();
+    let mut msg = signed_message.message.bytes().collect::<Vec<u8>>();
+
+    // Concatenate msg and once
+    msg.extend_from_slice(&nonce);
 
     let result = verifier.verify_oneshot(&signature_bytes, &msg).unwrap();
 

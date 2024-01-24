@@ -1,3 +1,6 @@
+import 'dart:math';
+import 'dart:typed_data';
+
 import 'package:convert/convert.dart';
 import 'package:dart/cryptohelper.dart';
 import 'package:flutter/material.dart';
@@ -43,6 +46,9 @@ class _MyHomePageState extends State<MyHomePage> {
   String validateCompactBackend = '';
 
   Future<void> _generateAndSign() async {
+    // Nonce synchronized between client and server
+    var nonce = "30450221009137c8489f844822843868d77f93c288ea64427005";
+
     // Generate Key Pair
     AsymmetricKeyPair<PublicKey, PrivateKey> keyPair =
         cryptoHelper.generateKeyPair();
@@ -59,10 +65,18 @@ class _MyHomePageState extends State<MyHomePage> {
           cryptoHelper.publicKeyToHex(keyPair.publicKey as ECPublicKey);
     });
 
+    // Generate a random message string
+    var random = Random.secure();
+    var messageInt = List<int>.generate(32, (_) => random.nextInt(256));
+    var messageStr = String.fromCharCodes(messageInt);
+
     // messagehash from Hello World!
-    var message = cryptoHelper
-        .messageHashToHex(cryptoHelper.hashMessage("claziosi@icrc.org"));
-    var messageHash = cryptoHelper.hashMessage(message);
+    var message =
+        cryptoHelper.messageHashToHex(cryptoHelper.hashMessage(messageStr));
+
+    // Convert string variable into UInt8List
+    var messageHash = cryptoHelper.hashMessage(message + nonce);
+    // Concatenate message hash and nonce
 
     // Update Message Hash
     setState(() {
