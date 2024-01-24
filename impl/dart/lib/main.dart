@@ -1,3 +1,4 @@
+import 'package:convert/convert.dart';
 import 'package:dart/cryptohelper.dart';
 import 'package:flutter/material.dart';
 import 'package:pointycastle/api.dart';
@@ -59,12 +60,13 @@ class _MyHomePageState extends State<MyHomePage> {
     });
 
     // messagehash from Hello World!
-    var message = "Hello World!";
+    var message = cryptoHelper
+        .messageHashToHex(cryptoHelper.hashMessage("claziosi@icrc.org"));
     var messageHash = cryptoHelper.hashMessage(message);
 
     // Update Message Hash
     setState(() {
-      messageHashStr = cryptoHelper.messageHashToHex(messageHash);
+      messageHashStr = message;
     });
 
     // Sign the hash with private key

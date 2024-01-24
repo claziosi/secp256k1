@@ -1,7 +1,7 @@
 use actix_cors::Cors;
 use actix_web::{web, App, HttpResponse, HttpServer, Responder, http};
 use openssl::bn::BigNumContext;
-use openssl::hash::MessageDigest;
+use openssl::hash::{self, MessageDigest};
 use serde::Deserialize;
 use openssl::ec::{EcGroup, EcKey, EcPoint};
 use openssl::nid::Nid;
@@ -37,18 +37,18 @@ async fn validate_signature(signed_message: web::Json<SignedMessage>) -> impl Re
     let ec_key = EcKey::from_public_key(&group, &ec_point).unwrap();
     let pkey = PKey::from_ec_key(ec_key).unwrap();
 
-    // Create a verifier with the EC public key
-    let mut verifier = Verifier::new(MessageDigest::sha256(), &pkey).unwrap();
+    // Initialize a verifier
+    let mut verifier = Verifier::new_without_digest(&pkey).unwrap();
 
     // Convert the message to a byte slice
-    let msg = hex::decode(&signed_message.message).unwrap();
+    /* let msg = hex::decode(&signed_message.message).unwrap();
+    verifier.update(&msg).unwrap(); */
+    //let msg = "Hello World!".bytes().collect::<Vec<u8>>();
+    let msg = signed_message.message.bytes().collect::<Vec<u8>>();
 
-    // Verify the signature
-    verifier.update(&msg).unwrap();
+    let result = verifier.verify_oneshot(&signature_bytes, &msg).unwrap();
 
-    let result = verifier.verify(&signature_bytes).unwrap();
-
-    if result {
+    if result == true {
         HttpResponse::Ok().body("true")
     } else {
         HttpResponse::BadRequest().body("Signature is invalid")
