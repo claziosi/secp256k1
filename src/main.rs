@@ -1,7 +1,6 @@
 use actix_cors::Cors;
 use actix_web::{web, App, HttpResponse, HttpServer, Responder, http};
 use openssl::bn::BigNumContext;
-use openssl::hash::{self, MessageDigest};
 use serde::Deserialize;
 use openssl::ec::{EcGroup, EcKey, EcPoint};
 use openssl::nid::Nid;
@@ -17,7 +16,8 @@ pub struct SignedMessage {
 
 // Handler for validating signatures
 async fn validate_signature(signed_message: web::Json<SignedMessage>) -> impl Responder {
-    // Nonce to prevent replay attacks (find a way to send it to the client)
+    // Nonce to prevent replay attacks (to be sent to the client on a regular basis)
+    // Change the nonce will prevent the reuse of the same signature twice
     let nonce = "30450221009137c8489f844822843868d77f93c288ea64427005".as_bytes().to_vec();
 
     // Convert hexadecimal strings to byte slices
@@ -43,9 +43,6 @@ async fn validate_signature(signed_message: web::Json<SignedMessage>) -> impl Re
     let mut verifier = Verifier::new_without_digest(&pkey).unwrap();
 
     // Convert the message to a byte slice
-    /* let msg = hex::decode(&signed_message.message).unwrap();
-    verifier.update(&msg).unwrap(); */
-    //let msg = "Hello World!".bytes().collect::<Vec<u8>>();
     let mut msg = signed_message.message.bytes().collect::<Vec<u8>>();
 
     // Concatenate msg and once
