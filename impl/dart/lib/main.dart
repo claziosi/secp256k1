@@ -1,7 +1,4 @@
 import 'dart:math';
-import 'dart:typed_data';
-
-import 'package:convert/convert.dart';
 import 'package:dart/cryptohelper.dart';
 import 'package:flutter/material.dart';
 import 'package:pointycastle/api.dart';
@@ -46,7 +43,7 @@ class _MyHomePageState extends State<MyHomePage> {
   String validateCompactBackend = '';
 
   Future<void> _generateAndSign() async {
-    // Nonce synchronized between client and server
+    // Nonce to be synchronized between client and server
     var nonce = "30450221009137c8489f844822843868d77f93c288ea64427005";
 
     // Generate Key Pair
@@ -121,19 +118,15 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           const SizedBox(height: 20), // Add spacing between button and text
           if (privateKeyStr.isNotEmpty)
-            InfoCard(
-                title: "Private Key",
-                content: cryptoHelper.hexToBase64(privateKeyStr)),
+            InfoCard(title: "Private Key", content: privateKeyStr),
           if (publicKeyStr.isNotEmpty)
-            InfoCard(
-                title: "Public Key",
-                content: cryptoHelper.hexToBase64(publicKeyStr)),
+            InfoCard(title: "Public Key", content: publicKeyStr),
           if (messageHashStr.isNotEmpty)
             InfoCard(title: "Message Hash (SHA-256)", content: messageHashStr),
           if (signatureStr.isNotEmpty)
             InfoCard(
                 title: "Signature in Hexadecimal Format",
-                content: cryptoHelper.hexToBase64(signatureStr)),
+                content: signatureStr),
           if (verificationResult.isNotEmpty)
             InfoCard(
                 title: "Signature Verification Result (in App)",
@@ -174,7 +167,7 @@ Future<bool> validateSignatureOnBackend(
   String signatureHex,
   String publicKeyHex,
 ) async {
-  final url = Uri.parse('http://127.0.0.1:8080/validate_signature');
+  final url = Uri.parse('https://salvr.westeurope.cloudapp.azure.com/auth');
 
   try {
     final response = await http.post(
