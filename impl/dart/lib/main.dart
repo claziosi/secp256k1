@@ -167,23 +167,25 @@ Future<bool> validateSignatureOnBackend(
   String signatureHex,
   String publicKeyHex,
 ) async {
-  final url = Uri.parse('https://salvr.westeurope.cloudapp.azure.com/auth');
+  final url = Uri.parse('http://localhost:8080/auth');
+
+  final tokenStr = "$publicKeyHex:$signatureHex:$messageHashHex";
+  final token = base64.encode(utf8.encode(tokenStr));
+  print('Token: $token');
 
   try {
-    final response = await http.post(
+    final response = await http.get(
       url,
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode({
-        'message': messageHashHex,
-        'signature': signatureHex,
-        'public_key': publicKeyHex,
-      }),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token'
+      },
     );
 
     if (response.statusCode == 200) {
       print('Request successful. Response body: ${response.body}');
       // Handle response here if necessary (e.g., parse JSON)
-      return response.body == 'true';
+      return response.body == 'Authenticated';
     } else {
       print(
           'Request failed with status: ${response.statusCode}. Response body: ${response.body}');
