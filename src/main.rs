@@ -60,7 +60,13 @@ pub enum ErrorResponse {
 }
 
 
-/// Log api key middleware only logs about missing or invalid api keys
+/// 
+/// Middleware to require a Bearer token
+/// 
+/// This middleware will check if the request has a valid Bearer token
+/// If the token is valid, the request will be passed to the next middleware
+/// If the token is invalid, the request will be rejected
+/// 
 struct AuthToken;
 
 impl<S> Transform<S, ServiceRequest> for AuthToken
