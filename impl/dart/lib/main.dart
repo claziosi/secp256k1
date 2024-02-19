@@ -169,7 +169,9 @@ Future<bool> validateSignatureOnBackend(
 ) async {
   final url = Uri.parse('http://localhost:8080/auth');
 
+  // Construct the token string
   final tokenStr = "$publicKeyHex:$signatureHex:$messageHashHex";
+  // Base64 encode the token string
   final token = base64.encode(utf8.encode(tokenStr));
   print('Token: $token');
 
